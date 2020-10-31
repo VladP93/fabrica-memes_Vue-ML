@@ -9,7 +9,7 @@
               <span class="grey--text">
                 {{ image.name }}
               </span>
-              <v-chip :color="selectClass" v-if="image">
+              <v-chip :color="selectClass(image.scorePromedio)" v-if="image">
                 {{ image.scorePromedio | trimScore }}
               </v-chip>
               <br />
@@ -115,6 +115,16 @@ export default {
             });
         });
     },
+    selectClass: function(score) {
+      let returnStr;
+      score < -0.25
+        ? (returnStr = "red")
+        : score >= -0.25 && score < 0.25
+        ? (returnStr = "warning")
+        : (returnStr = "success");
+
+      return returnStr;
+    },
   },
   firestore() {
     return {
@@ -130,18 +140,6 @@ export default {
     },
     trimScore: function(value) {
       return Number(value.toString().slice(0, 5));
-    },
-  },
-  computed: {
-    selectClass: function(score) {
-      let returnStr;
-      score < -0.25
-        ? (returnStr = "red")
-        : score >= -0.25 && score < 0.25
-        ? (returnStr = "warning")
-        : (returnStr = "success");
-
-      return returnStr;
     },
   },
 };

@@ -106,7 +106,6 @@ export default {
               data
             )
             .then((res) => {
-              console.log("hasta acá bien xd");
               const labels = [];
               let slicedLabelArray = res.data.responses[0].labelAnnotations.slice(
                 0,

@@ -136,7 +136,7 @@ export default {
     selectClass: function(score) {
       let returnStr;
       score < -0.25
-        ? (returnStr = "danger")
+        ? (returnStr = "red")
         : score >= -0.25 && score < 0.25
         ? (returnStr = "warning")
         : (returnStr = "success");

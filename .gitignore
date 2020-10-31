@@ -25,3 +25,8 @@ pnpm-debug.log*
 # Private files/Keys
 
 apiKey.js
+.firebase
+.firebaserc
+firebase.json
+firestore.*
+storage.rules

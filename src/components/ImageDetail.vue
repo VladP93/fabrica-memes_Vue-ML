@@ -13,9 +13,11 @@
                         {{image.name}}
                       </span>
                       <v-chip>
-                        {{image.scorePromedio}}
+                        <!-- {{image.scorePromedio | trimScore}} -->
+                        {{image.scorePromedio }}
                       </v-chip>
                       <br>
+                      <span>{{image && image.labels | separateLabels}}</span>
                     </div>
                   </v-card-title>
               </v-card>
@@ -76,6 +78,11 @@ export default {
             image: firestore.collection('images').doc(this.id),
             comentarios: firestore.collection('comentarios').where("imageId", "==", this.id)
         }
+    },
+    filters:{
+      separateLabels: function(value){
+        return `${value[0]}, ${value[1]}, ${value[2]}`
+      }
     }
 }
 </script>

@@ -18,14 +18,15 @@
           <v-container fluid class="pl-0 pr-0">
             <v-layout row wrap>
               <v-flex xs12 sm6 lg3 v-for="image in images" v-bind:key="image.id">
-                <v-card>
+                <v-card class="ml-2 mr-2">
                   <v-img
                   class="white--text"
                     height="200px"
                     :src="image.url">
                   </v-img>
                   <v-card-title>
-                    <div>
+                    
+                    <div style="height: 100px;">
                       <span class="grey--text">
                         {{image.name}}
                       </span>
@@ -33,10 +34,11 @@
                         {{image.scorePromedio}}
                       </v-chip>
                       <br>
+                      <span>{{image.labels | separateLabels }}</span>
                     </div>
                   </v-card-title>
                   <v-card-actions>
-                    <v-btn flat @click="goToImageDetail(image.id)">Explore</v-btn>
+                    <v-btn text @click="goToImageDetail(image.id)">Explore</v-btn>
                   </v-card-actions>
                 </v-card>
               </v-flex>
@@ -50,13 +52,16 @@
 <script>
 import {firestore} from '../main'
 import {storage} from '../main'
+import {apiKey} from '../utils/apiKey';
+import axios from "axios";
 
   export default {
     name: 'Home',
     mounted:function(){
-      console.log(this.images)
+      
     },
     data: () => ({
+      apiKey,
       file:'',
       images:[],
     }),
@@ -67,14 +72,50 @@ import {storage} from '../main'
       uploadFile: function(){
         let name = `${+new Date()}-${this.file.name}`
         let metadata = {contentType: this.file.type}
-        storage.child(name).put(this.file, metadata).then(res =>res.ref.getDownloadURL()).then(url =>{
+
+        storage.child(name).put(this.file, metadata)
+        .then(res =>res.ref.getDownloadURL())
+        .then(url =>{
+          const input = this.$refs.fileInput
+          input.type = 'text'
+          input.type = "file"
+
+          const data = {
+            "requests":[{
+              "features":[{
+                "type": "LABEL_DETECTION"
+              }],
+              "image": {
+                "source": {
+                  "imageUri": url
+                }
+              }
+            }]
+          }
+          
+          axios.post(`https://vision.googleapis.com/v1/images:annotate?key=${this.apiKey}`, data)
+          .then(res=>{
+            console.log("hasta acá bien xd")
+            const labels = []
+            let slicedLabelArray = res.data.responses[0].labelAnnotations.slice(0,3)
+            slicedLabelArray.forEach(function(label){
+              labels.push(label.description)
+            });
+
           let image = {
             url,
             name,
             createdAt:(+new Date()),
+            labels,
             scorePromedio:0
           }
           firestore.collection('images').add(image)
+
+
+          }).catch(err=>{
+            console.log(err)
+          })
+
         })
       },
       goToImageDetail: function(id){
@@ -86,5 +127,10 @@ import {storage} from '../main'
         images: firestore.collection('images')
       }
     },
+    filters:{
+      separateLabels: function(value){
+        return `${value[0]}, ${value[1]}, ${value[2]}`
+      }
+    }
   }
 </script>
